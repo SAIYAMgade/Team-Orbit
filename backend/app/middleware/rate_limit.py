@@ -45,8 +45,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             await self.redis_client.ping()
             logger.info("Rate limit Redis connection established")
         except Exception as e:
-            logger.error(f"Failed to connect to Redis for rate limiting: {e}")
-            raise
+            logger.warning(f"Failed to connect to Redis for rate limiting (skipping): {e}")
+            self.redis_client = None
 
     async def close(self):
         """Close Redis connection."""
@@ -61,6 +61,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Initialize Redis if not already done
         if self.redis_client is None:
             await self.initialize()
+
+        if self.redis_client is None:
+            return await call_next(request)
 
         # Determine rate limit tier
         tier = self._get_rate_limit_tier(request)

@@ -33,8 +33,8 @@ class TokenBlacklist:
             await self.redis_client.ping()
             logger.info("Token blacklist Redis connection established")
         except Exception as e:
-            logger.error(f"Failed to connect to Redis for token blacklist: {e}")
-            raise
+            logger.warning(f"Redis not available for token blacklist (continuing without blacklist): {e}")
+            self.redis_client = None
 
     async def close(self):
         """Close Redis connection."""
@@ -85,6 +85,8 @@ class TokenBlacklist:
         Returns:
             bool: True if token is blacklisted
         """
+        if not self.redis_client:
+            return False
         try:
             key = f"{self.prefix}{token}"
             result = await self.redis_client.exists(key)

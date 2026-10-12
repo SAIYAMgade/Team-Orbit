@@ -39,15 +39,24 @@ async def lifespan(app: FastAPI):
     await initialize_token_blacklist()
     logger.info("Token blacklist initialized")
 
-    # Initialize database tables (in development)
-    if settings.DEBUG:
-        logger.info("Database tables will be created by Alembic migrations")
+    # Initialize database tables
+    try:
+        from app.db.session import engine, Base
+        import app.db.models  # noqa: F401
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database schema initialized successfully")
+    except Exception as e:
+        logger.warning(f"Database table verification: {e}")
 
     yield
 
     # Shutdown
     logger.info("Closing Redis connection")
-    await redis_client.close()
+    try:
+        await redis_client.close()
+    except Exception:
+        pass
     logger.info(f"Shutting down {settings.APP_NAME}")
 
 

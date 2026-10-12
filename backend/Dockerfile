@@ -76,5 +76,5 @@ USER appuser
 # Expose port
 EXPOSE 8000
 
-# Production command
-CMD ["gunicorn", "app.main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
+# Production command (supports dynamic Render PORT)
+CMD exec gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-8000}
