@@ -8,8 +8,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from datetime import datetime, timezone
 import logging
+import time
 import redis.asyncio as redis
+
+SERVER_START_TIME = time.time()
 
 from app.core.config import settings
 from app.core.token_blacklist import initialize_token_blacklist
@@ -128,9 +132,14 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for monitoring"""
+    """Health check endpoint for monitoring & UptimeRobot keep-alive"""
+    uptime_seconds = round(time.time() - SERVER_START_TIME, 2)
     return {
         "status": "healthy",
+        "ok": True,
+        "service": settings.APP_NAME,
+        "uptime": uptime_seconds,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "environment": settings.APP_ENV,
         "debug": settings.DEBUG
     }

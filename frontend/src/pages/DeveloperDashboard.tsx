@@ -25,6 +25,54 @@ import {
   Tooltip
 } from 'recharts';
 
+const CustomBarTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-[#121212] border border-[#2e2e2e] rounded-lg px-3 py-2 shadow-2xl shadow-black pointer-events-none">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <span
+            className="w-2.5 h-2.5 rounded-full inline-block shadow-sm"
+            style={{ backgroundColor: data.fill || '#00d4ff' }}
+          />
+          <span className="text-xs font-semibold text-zinc-300">{data.day}</span>
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span className="text-xs text-zinc-400">Completed:</span>
+          <span className="text-sm font-bold text-white font-mono tracking-tight">
+            {data.count} <span className="text-xs font-normal text-zinc-300">tasks</span>
+          </span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomPieTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    return (
+      <div className="bg-[#121212] border border-[#2e2e2e] rounded-lg px-3 py-2 shadow-2xl shadow-black pointer-events-none">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <span
+            className="w-2.5 h-2.5 rounded-full inline-block shadow-sm"
+            style={{ backgroundColor: data.payload?.color || '#00d4ff' }}
+          />
+          <span className="text-xs font-semibold text-zinc-300">{data.name}</span>
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span className="text-xs text-zinc-400">Total:</span>
+          <span className="text-sm font-bold text-white font-mono tracking-tight">
+            {data.value} <span className="text-xs font-normal text-zinc-300">tasks</span>
+          </span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function PlatformDeveloperDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
@@ -267,7 +315,7 @@ export default function PlatformDeveloperDashboard() {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0a0a0a', borderColor: '#222222', borderRadius: '8px', fontSize: '11px' }}
+                    content={<CustomPieTooltip />}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -300,10 +348,8 @@ export default function PlatformDeveloperDashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={previewActivityData}>
                   <Tooltip
-                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                    contentStyle={{ backgroundColor: '#0a0a0a', borderColor: '#222222', borderRadius: '8px', fontSize: '11px', padding: '6px 10px' }}
-                    formatter={(value: any) => [`${value} tasks`, 'Completed']}
-                    labelStyle={{ color: '#8e92a4', fontSize: '11px' }}
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.08)' }}
+                    content={<CustomBarTooltip />}
                   />
                   <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                     {previewActivityData.map((entry, index) => (
